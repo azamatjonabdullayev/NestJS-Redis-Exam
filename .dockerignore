@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vscode/
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+Dockerfile
+.git/
+.gitignore
+.prettierrc
+eslint.config.mjs
