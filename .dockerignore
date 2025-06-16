@@ -11,3 +11,4 @@ Dockerfile
 .gitignore
 .prettierrc
 eslint.config.mjs
+*.md
