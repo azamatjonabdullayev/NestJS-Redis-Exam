@@ -39,7 +39,7 @@ export class AuthController {
     });
 
     return {
-      message: 'Your number is successfully verified!\nNow you can register',
+      message: 'Your number is successfully verified! Now you can register',
     };
   }
 
