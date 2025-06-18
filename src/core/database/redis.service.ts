@@ -20,7 +20,6 @@ export class RedisServise implements OnModuleInit, OnModuleDestroy {
   onModuleDestroy() {
     console.log('Redis disconnected');
     this.redis.disconnect();
-    process.exit(1);
   }
 
   async getOtp(phoneNumber: string) {
@@ -44,7 +43,7 @@ export class RedisServise implements OnModuleInit, OnModuleDestroy {
   }
 
   async setSessionToken(phoneNumber: string, token: string) {
-    await this.redis.setex(`session:${phoneNumber}`, 300, token);
+    await this.redis.setex(this.sessionKey + phoneNumber, 600, token);
     return true;
   }
 

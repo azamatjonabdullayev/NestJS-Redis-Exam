@@ -3,6 +3,7 @@ import { RedisServise } from 'src/core/database/redis.service';
 import { SmsService } from './sms.service';
 import { generateOTP } from 'src/tools/otp.tool';
 import { generateUUID } from 'src/tools/uuid-token.tool';
+import { VerifyOtpDto } from '../auth/dto/verify-otp.dto';
 
 @Injectable()
 export class OtpService {
@@ -32,30 +33,32 @@ export class OtpService {
       tempGenOtp,
     );
 
-    if (redisResponse) {
-      await this.smsService.sendSms(phoneNumber, tempGenOtp);
-      return true;
-    }
-    return false;
+    await this.smsService.sendSms(phoneNumber, tempGenOtp);
+    return true;
   }
 
-  async verifySendedUserOtp(phoneNumber: string, code: string) {
-    const otp = await this.checkOtpExists(phoneNumber);
+  async verifySendedUserOtp(verification_data: VerifyOtpDto) {
+    const otp = await this.checkOtpExists(verification_data.phone_number);
 
     if (!otp) {
       throw new BadRequestException("Code doesn't exist!");
     }
 
-    if (otp !== code) {
+    if (otp !== verification_data.code) {
       throw new BadRequestException('Invalid code!');
     }
 
-    await this.redisService.deleteOtp(phoneNumber);
+    await this.redisService.deleteOtp(verification_data.phone_number);
     const sessionToken = generateUUID();
 
-    await this.redisService.setSessionToken(phoneNumber, sessionToken);
+    await this.redisService.setSessionToken(
+      verification_data.phone_number,
+      sessionToken,
+    );
 
-    return sessionToken;
+    const phoneNumber = verification_data.phone_number;
+
+    return [sessionToken, phoneNumber];
   }
 
   async checkSessionToken(phoneNumber: string, token: string) {

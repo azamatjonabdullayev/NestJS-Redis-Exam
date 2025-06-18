@@ -6,9 +6,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/core/database/prisma.service';
 import { OtpService } from '../OTP/otp.service';
-import { CreateAuthDto } from './dto/register.dto';
+import { RegisterDto } from './dto/register.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import * as bcrypt from 'bcrypt';
+import { PhoneDto } from './dto/phone-register.dto';
+import type { UUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -18,16 +20,16 @@ export class AuthService {
     private otp: OtpService,
   ) {}
 
-  async sendOtpUser(authDto: Partial<CreateAuthDto>) {
+  async sendOtpUser(phone: PhoneDto) {
     const findUser = await this.prisma.user.findFirst({
       where: {
-        phoneNumber: authDto.phone_number,
+        phoneNumber: phone.phone_number,
       },
     });
 
     if (findUser) throw new ConflictException('User already exists');
 
-    const res = await this.otp.sendOtp(authDto.phone_number as string);
+    const res = await this.otp.sendOtp(phone.phone_number as string);
 
     if (!res) throw new InternalServerErrorException('Server error');
 
@@ -37,42 +39,45 @@ export class AuthService {
   }
 
   async verifyOtpUser(data: VerifyOtpDto) {
-    const sessionToken = await this.otp.verifySendedUserOtp(
-      data.phone_number,
-      data.code,
-    );
+    const [sessionToken, phoneNumber] =
+      await this.otp.verifySendedUserOtp(data);
 
-    return {
-      success: true,
-      statusCode: 200,
-      sessionToken,
-    };
+    return [sessionToken, phoneNumber];
   }
 
-  async register(authDto: CreateAuthDto) {
-    const findUser = await this.prisma.user.findFirst({
+  async register(
+    authDto: RegisterDto,
+    sessionToken: UUID,
+    phoneNumber: string,
+  ) {
+    const findUser = await this.prisma.user.findUnique({
       where: {
-        phoneNumber: authDto.phone_number,
+        userName: '@' + authDto.userName,
       },
     });
 
-    if (findUser) throw new ConflictException('phone_number already exists');
+    if (findUser) throw new ConflictException('User already exists');
 
-    await this.otp.checkSessionToken(
-      authDto.phone_number,
-      authDto.session_token,
-    );
+    const findEmail = await this.prisma.user.findUnique({
+      where: {
+        email: authDto.email,
+      },
+    });
+
+    if (findEmail) throw new ConflictException('Email already exists');
+
+    await this.otp.checkSessionToken(phoneNumber, sessionToken);
 
     const hashedPassword = await bcrypt.hash(authDto.password, 12);
 
     const user = await this.prisma.user.create({
       data: {
-        email: 'test',
-        firstName: 'test',
-        lastName: 'test',
-        userName: 'test',
+        firstName: authDto.firstName,
+        lastName: authDto.lastName,
+        userName: '@' + authDto.userName,
+        email: authDto.email,
         password: hashedPassword,
-        phoneNumber: authDto.phone_number,
+        phoneNumber: phoneNumber,
       },
     });
 
@@ -81,7 +86,7 @@ export class AuthService {
       role: user.role,
     });
 
-    await this.otp.delSessionTokenUser(authDto.phone_number);
+    await this.otp.delSessionTokenUser(phoneNumber);
 
     return token;
   }
