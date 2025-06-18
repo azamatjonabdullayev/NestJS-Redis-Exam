@@ -18,10 +18,12 @@ export class OtpService {
   async sendOtp(phoneNumber: string) {
     const otp = await this.checkOtpExists(phoneNumber);
 
-    if (otp)
+    if (otp) {
+      const ttl = await this.redisService.getTTL(phoneNumber);
       throw new BadRequestException(
-        'Code is already sent, please try again after some time',
+        `Code is already sent, please try again after ${ttl} seconds`,
       );
+    }
 
     const tempGenOtp = generateOTP();
 
