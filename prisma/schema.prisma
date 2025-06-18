@@ -234,6 +234,7 @@ model VideReaction {
   video Video @relation(fields: [videoId], references: [id])
 
   @@unique([userId, videoId])
+  @@map("vide_reactions")
 }
 
 model AuditLog {
@@ -245,4 +246,6 @@ model AuditLog {
   details    String       @db.Text
 
   admin User @relation(fields: [adminId], references: [id])
+
+  @@map("audit_logs")
 }
