@@ -78,6 +78,7 @@ export class AuthService {
         email: authDto.email,
         password: hashedPassword,
         phoneNumber: phoneNumber,
+        isPhoneVerified: true,
       },
     });
 
