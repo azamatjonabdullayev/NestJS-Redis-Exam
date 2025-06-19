@@ -5,7 +5,7 @@ import { OtpModule } from '../OTP/otp.module';
 import { EmailModule } from '../email/email.module';
 
 @Module({
-  imports: [OtpModule, EmailModule],
+  imports: [OtpModule],
   controllers: [AuthController],
   providers: [AuthService],
 })

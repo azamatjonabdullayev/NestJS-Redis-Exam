@@ -16,7 +16,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       },
       defaults: {
-        from: `"My App" <${process.env.USER_MAIL}>`,
+        from: `"NestJS email verification" <${process.env.USER_MAIL}>`,
       },
     }),
   ],
