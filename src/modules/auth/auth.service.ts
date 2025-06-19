@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -21,6 +22,10 @@ export class AuthService {
   ) {}
 
   async sendOtpUser(phone: PhoneDto) {
+    const isSent = await this.otp.checkOtpExists(phone.phone_number);
+
+    if (isSent) throw new BadRequestException('Code is already sent');
+
     const findUser = await this.prisma.user.findFirst({
       where: {
         phoneNumber: phone.phone_number,
