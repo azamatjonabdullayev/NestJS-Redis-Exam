@@ -77,6 +77,10 @@ export class AuthController {
       },
     });
     await this.redis.delEmailSession(session);
+
+    return {
+      message: 'Your email is successfully verified!',
+    };
   }
 
   @Post('resend-email')
