@@ -16,6 +16,7 @@ import { PhoneDto } from './dto/phone-register.dto';
 import { RegisterDto } from './dto/register.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { LoginDto } from './dto/login.dto';
+import { EmailDto } from '../email/dto/send-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -84,8 +85,8 @@ export class AuthController {
   }
 
   @Post('resend-email')
-  async resendEmail(@Query('email') email: string) {
-    return await this.authService.resendEmailVerif(email);
+  async resendEmail(@Query('email') email: EmailDto) {
+    return await this.authService.resendEmailVerif(email.email);
   }
 
   @Post('register')

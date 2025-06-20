@@ -2,6 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { type UUID, randomUUID } from 'crypto';
 import { RedisServise } from 'src/core/database/redis.service';
+import { EmailDto } from './dto/send-email.dto';
 
 @Injectable()
 export class EmailService {
@@ -10,11 +11,14 @@ export class EmailService {
     private readonly redis: RedisServise,
   ) {}
 
-  async sendVerificationEmail(toEmail: string) {
+  async sendVerificationEmail(toEmail: EmailDto) {
     const emailSession: UUID = randomUUID();
-    const sessionKey = await this.redis.setEmailSession(toEmail, emailSession);
+    const sessionKey = await this.redis.setEmailSession(
+      toEmail.email,
+      emailSession,
+    );
     await this.mailerService.sendMail({
-      to: toEmail,
+      to: toEmail.email,
       from: process.env.USER_MAIL,
       subject: 'Verify your email',
       html: `

@@ -97,7 +97,7 @@ export class AuthService {
     });
 
     const { session: emailSession } =
-      await this.emailService.sendVerificationEmail(authDto.email);
+      await this.emailService.sendVerificationEmail({ email: authDto.email });
 
     await this.otp.delSessionTokenUser(phoneNumber);
 
@@ -116,7 +116,7 @@ export class AuthService {
     if (user.isEmailVerified)
       throw new BadRequestException('Email already verified');
 
-    await this.emailService.sendVerificationEmail(email);
+    await this.emailService.sendVerificationEmail({ email });
 
     return {
       message: 'Email sent successfully',

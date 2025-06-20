@@ -31,7 +31,6 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
   @IsEmail()
   email: string;
 
